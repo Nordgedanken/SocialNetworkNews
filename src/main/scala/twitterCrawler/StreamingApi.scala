@@ -24,11 +24,13 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
       conf.getStringList("twitter.lists").asScala.toList
     val trackedUsers: Seq[Long] = Await.result(
       this.getListUsers(trackedLists),
-      scala.concurrent.duration.Duration.Inf)
+      scala.concurrent.duration.Duration.Inf
+    )
 
     println(
       s"Launching streaming session with tracked keywords: $trackedWords\r\n" +
-        s"And with tracked Users: $trackedUsers")
+        s"And with tracked Users: $trackedUsers"
+    )
 
     streamingClient.filterStatuses(tracks = trackedWords, follow = trackedUsers) {
       case tweet: Tweet =>
@@ -64,10 +66,13 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
         val slug = splitted(1)
 
         var listUsers = Await.result(
-          restClient.listMembersBySlugAndOwnerName(slug = slug,
-                                                   owner_screen_name = username,
-                                                   include_entities = false),
-          scala.concurrent.duration.Duration.Inf)
+          restClient.listMembersBySlugAndOwnerName(
+            slug = slug,
+            owner_screen_name = username,
+            include_entities = false
+          ),
+          scala.concurrent.duration.Duration.Inf
+        )
         listUsers.data.users.foreach((user: User) => {
           trackedUsers = trackedUsers :+ user.id
         })
@@ -77,7 +82,8 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
               slug = slug,
               owner_screen_name = username,
               include_entities = false,
-              cursor = listUsers.data.next_cursor),
+              cursor = listUsers.data.next_cursor
+            ),
             scala.concurrent.duration.Duration.Inf
           )
           listUsers.data.users.foreach((user: User) => {
