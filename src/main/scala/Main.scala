@@ -36,7 +36,7 @@ object Main extends App {
       //sender.sendHelloWorld
 
       val stream = new twitterCrawler.StreamingApi(streamingClient = streamingClient, restClient = restClient)
-      stream.fetchHashtags
+      stream.fetchTweets
 
       webServer.WebServer.main()
     case Failure(err) => println(err.toString)

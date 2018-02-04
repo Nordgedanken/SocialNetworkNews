@@ -5,14 +5,18 @@ import com.danielasfregola.twitter4s.entities.{Tweet, User}
 import com.danielasfregola.twitter4s.http.clients.streaming.TwitterStream
 import com.danielasfregola.twitter4s.{TwitterRestClient, TwitterStreamingClient}
 import com.typesafe.config.{Config, ConfigFactory}
+import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
+import slick.jdbc.SQLiteProfile.api._
+
+import scala.concurrent.duration.Duration
 
 class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient: TwitterRestClient) {
   val conf: Config = ConfigFactory.load()
-  def fetchHashtags: Future[TwitterStream] = {
+  def fetchTweets: Future[TwitterStream] = {
     val trackedWords: Seq[String] = conf.getStringList("twitter.trackedWords").asScala
     val trackedLists: List[String] = conf.getStringList("twitter.lists").asScala.toList
     val trackedUsers: Seq[Long] = Await.result(this.getListUsers(trackedLists), scala.concurrent.duration.Duration.Inf)
@@ -21,9 +25,27 @@ class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient:
       s"And with tracked Users: $trackedUsers")
 
     streamingClient.filterStatuses(tracks = trackedWords, follow = trackedUsers) {
-      case tweet: Tweet => println(tweet.text)
+      case tweet: Tweet =>
+        println(tweet.text)
+        this.saveToDatabase(tweet)
       case disconnect: DisconnectMessage => println("Disconnect: ", disconnect.disconnect.reason)
     }
+  }
+
+  private def saveToDatabase(tweet: Tweet): Unit = {
+    val db = Database.forConfig("db")
+    try {
+      val tweets = TableQuery[database.Tweets]
+      val currentDate = new java.sql.Date(DateTime.now(DateTimeZone.UTC).getMillis)
+      val sqlSetup = DBIO.seq(
+        // Create the tables, including primary and foreign keys
+        tweets.schema.create,
+
+        tweets += (tweet.id.toInt, "", "", "", "", currentDate)
+      )
+      val setupFuture = db.run(sqlSetup)
+      Await.result(setupFuture, Duration.Inf)
+    } finally db.close()
   }
 
   private def getListUsers(trackedLists: List[String]): Future[Seq[Long]] = {
