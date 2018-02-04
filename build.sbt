@@ -8,6 +8,7 @@ packageDescription := """A paper.li clone"""
 // wix build information
 wixProductId := "2d7d2fcd-bf87-4daf-99dc-279d1825f089"
 wixProductUpgradeId := "76b4ecc2-4d3e-4a59-bd63-e67e6cb29806"
+wixProductLicense := Some(file("LICENSE.rtf"))
 
 scalaVersion := "2.12.3"
 
