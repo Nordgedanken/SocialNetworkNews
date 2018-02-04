@@ -19,9 +19,12 @@ object WebServer {
 
     val requestHandler: HttpRequest => HttpResponse = {
       case HttpRequest(GET, Uri.Path("/"), _, _, _) =>
-        HttpResponse(entity = HttpEntity(
-          ContentTypes.`text/html(UTF-8)`,
-          "<html><body>Hello world!</body></html>"))
+        HttpResponse(
+          entity = HttpEntity(
+            ContentTypes.`text/html(UTF-8)`,
+            "<html><body>Hello world!</body></html>"
+          )
+        )
 
       case HttpRequest(GET, Uri.Path("/ping"), _, _, _) =>
         HttpResponse(entity = "PONG!")
@@ -34,7 +37,8 @@ object WebServer {
         HttpResponse(404, entity = "Unknown resource!")
     }
 
-    val bindingFuture = Http().bindAndHandleSync(requestHandler, "localhost", 8080)
+    val bindingFuture =
+      Http().bindAndHandleSync(requestHandler, "localhost", 8080)
 
     println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return
