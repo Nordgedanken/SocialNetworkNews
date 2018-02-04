@@ -6,15 +6,15 @@ import com.danielasfregola.twitter4s.http.clients.streaming.TwitterStream
 import com.danielasfregola.twitter4s.{TwitterRestClient, TwitterStreamingClient}
 import com.typesafe.config.{Config, ConfigFactory}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
 class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient: TwitterRestClient) {
   val conf: Config = ConfigFactory.load()
   def fetchHastags: Future[TwitterStream] = {
-    val trackedWords = conf.getStringList("twitter.trackedWords").toSeq
-    val trackedLists = conf.getStringList("twitter.lists").toList
+    val trackedWords: Seq[String] = conf.getStringList("twitter.trackedWords").asScala
+    val trackedLists: List[String] = conf.getStringList("twitter.lists").asScala.toList
     val trackedUsers: Seq[Long] = Await.result(this.getListUsers(trackedLists), scala.concurrent.duration.Duration.Inf)
 
     println(s"Launching streaming session with tracked keywords: $trackedWords\r\n" +
@@ -29,7 +29,7 @@ class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient:
   private def getListUsers(trackedLists: List[String]): Future[Seq[Long]] = {
     Future {
       var trackedUsers: Seq[Long] = Seq()
-      trackedLists.forEach((v: String) => {
+      trackedLists.foreach((v: String) => {
         val splitted = v.split("/")
         val username = splitted(0)
         val slug = splitted(1)
