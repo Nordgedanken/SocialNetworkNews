@@ -12,7 +12,7 @@ import scala.concurrent.{Await, Future}
 
 class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient: TwitterRestClient) {
   val conf: Config = ConfigFactory.load()
-  def fetchHastags: Future[TwitterStream] = {
+  def fetchHashtags: Future[TwitterStream] = {
     val trackedWords: Seq[String] = conf.getStringList("twitter.trackedWords").asScala
     val trackedLists: List[String] = conf.getStringList("twitter.lists").asScala.toList
     val trackedUsers: Seq[Long] = Await.result(this.getListUsers(trackedLists), scala.concurrent.duration.Duration.Inf)
