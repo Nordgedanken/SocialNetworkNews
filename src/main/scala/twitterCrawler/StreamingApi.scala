@@ -14,21 +14,28 @@ import slick.jdbc.SQLiteProfile.api._
 
 import scala.concurrent.duration.Duration
 
-class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient: TwitterRestClient) {
+class StreamingApi(val streamingClient: TwitterStreamingClient,
+                   val restClient: TwitterRestClient) {
   val conf: Config = ConfigFactory.load()
   def fetchTweets: Future[TwitterStream] = {
-    val trackedWords: Seq[String] = conf.getStringList("twitter.trackedWords").asScala
-    val trackedLists: List[String] = conf.getStringList("twitter.lists").asScala.toList
-    val trackedUsers: Seq[Long] = Await.result(this.getListUsers(trackedLists), scala.concurrent.duration.Duration.Inf)
+    val trackedWords: Seq[String] =
+      conf.getStringList("twitter.trackedWords").asScala
+    val trackedLists: List[String] =
+      conf.getStringList("twitter.lists").asScala.toList
+    val trackedUsers: Seq[Long] = Await.result(
+      this.getListUsers(trackedLists),
+      scala.concurrent.duration.Duration.Inf)
 
-    println(s"Launching streaming session with tracked keywords: $trackedWords\r\n" +
-      s"And with tracked Users: $trackedUsers")
+    println(
+      s"Launching streaming session with tracked keywords: $trackedWords\r\n" +
+        s"And with tracked Users: $trackedUsers")
 
     streamingClient.filterStatuses(tracks = trackedWords, follow = trackedUsers) {
       case tweet: Tweet =>
         println(tweet.text)
         this.saveToDatabase(tweet)
-      case disconnect: DisconnectMessage => println("Disconnect: ", disconnect.disconnect.reason)
+      case disconnect: DisconnectMessage =>
+        println("Disconnect: ", disconnect.disconnect.reason)
     }
   }
 
@@ -36,11 +43,11 @@ class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient:
     val db = Database.forConfig("db")
     try {
       val tweets = TableQuery[database.Tweets]
-      val currentDate = new java.sql.Date(DateTime.now(DateTimeZone.UTC).getMillis)
+      val currentDate =
+        new java.sql.Date(DateTime.now(DateTimeZone.UTC).getMillis)
       val sqlSetup = DBIO.seq(
         // Create the tables, including primary and foreign keys
         tweets.schema.create,
-
         tweets += (tweet.id.toInt, "", "", "", "", currentDate)
       )
       val setupFuture = db.run(sqlSetup)
@@ -56,14 +63,25 @@ class StreamingApi (val streamingClient: TwitterStreamingClient, val restClient:
         val username = splitted(0)
         val slug = splitted(1)
 
-        var listUsers = Await.result(restClient.listMembersBySlugAndOwnerName(slug = slug, owner_screen_name = username, include_entities= false), scala.concurrent.duration.Duration.Inf)
+        var listUsers = Await.result(
+          restClient.listMembersBySlugAndOwnerName(slug = slug,
+                                                   owner_screen_name = username,
+                                                   include_entities = false),
+          scala.concurrent.duration.Duration.Inf)
         listUsers.data.users.foreach((user: User) => {
-          trackedUsers = trackedUsers:+user.id
+          trackedUsers = trackedUsers :+ user.id
         })
         while (listUsers.data.next_cursor != listUsers.data.previous_cursor) {
-          listUsers = Await.result(restClient.listMembersBySlugAndOwnerName(slug = slug, owner_screen_name = username, include_entities= false, cursor = listUsers.data.next_cursor), scala.concurrent.duration.Duration.Inf)
+          listUsers = Await.result(
+            restClient.listMembersBySlugAndOwnerName(
+              slug = slug,
+              owner_screen_name = username,
+              include_entities = false,
+              cursor = listUsers.data.next_cursor),
+            scala.concurrent.duration.Duration.Inf
+          )
           listUsers.data.users.foreach((user: User) => {
-            trackedUsers = trackedUsers:+user.id
+            trackedUsers = trackedUsers :+ user.id
           })
         }
 
