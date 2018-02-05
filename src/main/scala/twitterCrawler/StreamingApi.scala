@@ -17,9 +17,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
 /**
+  *
   * StreamingAPI class is the connector for the Twitter Streaming Api
   *
   * It mainly has the purpose to get Tweets of the users from the Lists and Hashtags defined inside the Config
+  *
+  * @param streamingClient holds the current Client for the Twitter Streaming API
+  * @param restClient holds the current Client for the Twitter Rest API
   */
 class StreamingApi(val streamingClient: TwitterStreamingClient,
                    val restClient: TwitterRestClient) {
