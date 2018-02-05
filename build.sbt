@@ -22,13 +22,16 @@ mainClass in (Compile, packageBin) := Some("Main")
 mainClass in (Compile, run) := Some("Main")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
+resolvers += DefaultMavenRepository
 libraryDependencies ++= Seq(
   "com.danielasfregola" %% "twitter4s" % "5.5-SNAPSHOT",
   "com.typesafe" % "config" % "1.3.2",
   "ch.qos.logback" % "logback-classic" % "1.1.9",
   "com.typesafe.slick" %% "slick" % "3.2.1",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1",
-  "com.github.tototoshi" %% "scala-csv" % "1.3.5"
+  "com.github.tototoshi" %% "scala-csv" % "1.3.5",
+  "org.quartz-scheduler" % "quartz" % "2.3.0",
+  "org.quartz-scheduler" % "quartz-jobs" % "2.3.0",
 )
 enablePlugins(JavaAppPackaging)
 scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")

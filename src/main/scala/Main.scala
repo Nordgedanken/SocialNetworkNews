@@ -75,6 +75,8 @@ object Main extends App {
       stream.fetchTweets
 
       webServer.WebServer.main()
+
+      generator.Scheduler.main()
     case Failure(err) => println(err.toString)
   }
 
