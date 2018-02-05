@@ -1,22 +1,35 @@
 package twitterCrawler
 
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import com.danielasfregola.twitter4s.entities.streaming.common.DisconnectMessage
 import com.danielasfregola.twitter4s.entities.{Tweet, User}
 import com.danielasfregola.twitter4s.http.clients.streaming.TwitterStream
 import com.danielasfregola.twitter4s.{TwitterRestClient, TwitterStreamingClient}
+import com.github.tototoshi.csv.CSVWriter
 import com.typesafe.config.{Config, ConfigFactory}
 import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
-import slick.jdbc.SQLiteProfile.api._
 
-import scala.concurrent.duration.Duration
-
+/**
+  * StreamingAPI class is the connector for the Twitter Streaming Api
+  *
+  * It mainly has the purpose to get Tweets of the users from the Lists and Hashtags defined inside the Config
+  */
 class StreamingApi(val streamingClient: TwitterStreamingClient,
                    val restClient: TwitterRestClient) {
   val conf: Config = ConfigFactory.load()
+
+  /**
+    * fetchTweets is a async function, that listens on Twitter's Streaming API for the defined Lists and Hastags
+    *
+    * @return
+    */
   def fetchTweets: Future[TwitterStream] = {
     val trackedWords: Seq[String] =
       conf.getStringList("twitter.trackedWords").asScala
@@ -35,29 +48,41 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
     streamingClient.filterStatuses(tracks = trackedWords, follow = trackedUsers) {
       case tweet: Tweet =>
         println(tweet.text)
-        //this.saveToDatabase(tweet)
+        this.saveIDforLater(tweet)
         println("Done Saving")
       case disconnect: DisconnectMessage =>
         println("Disconnect: ", disconnect.disconnect.reason)
     }
   }
 
-  private def saveToDatabase(tweet: Tweet): Unit = {
-    val db = Database.forConfig("db")
-    try {
-      val tweets = TableQuery[database.Tweets]
-      val currentDate =
-        new java.sql.Date(DateTime.now(DateTimeZone.UTC).getMillis)
-      val sqlSetup = DBIO.seq(
-        // Create the tables, including primary and foreign keys
-        tweets.schema.create,
-        tweets += (tweet.id.toInt, "", "", "", "", currentDate)
-      )
-      val setupFuture = db.run(sqlSetup)
-      Await.result(setupFuture, Duration.Inf)
-    } finally db.close()
+  /**
+    * saveIDforLater saves the tweetID and indexing Date to a csv as soon as the Tweet gets published
+    *
+    * @todo implement
+    * @param tweet holds the currently processed Tweet
+    */
+  private def saveIDforLater(tweet: Tweet): Unit = {
+    val currentDate =
+      new Date(DateTime.now(DateTimeZone.UTC).getMillis)
+    val today = new SimpleDateFormat("dd/MM/yyyy").format(currentDate)
+    val todaysTweets = new File(s"data/tweets.$today")
+    if (!todaysTweets.exists()) {
+      todaysTweets
+    }
+    val writer = CSVWriter.open(todaysTweets, append = true)
+    writer.writeRow(List(tweet.id_str, currentDate.toString))
+
+    writer.close()
   }
 
+  /**
+    * getListUsers is used to ask the Twitter API about what users are in a List
+    *
+    * Uses the Twitter Rest API
+    *
+    * @param trackedLists holds the list slugs and corresponding Users for all tracked lists
+    * @return
+    */
   private def getListUsers(trackedLists: List[String]): Future[Seq[Long]] = {
     Future {
       var trackedUsers: Seq[Long] = Seq()
