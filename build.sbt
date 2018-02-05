@@ -31,4 +31,10 @@ libraryDependencies ++= Seq(
   "com.github.tototoshi" %% "scala-csv" % "1.3.5"
 )
 enablePlugins(JavaAppPackaging)
-//scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
+scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
+
+scalacOptions ++= Seq(
+  "-encoding", "UTF-8",
+  "-Ywarn-dead-code",
+  "-Ywarn-inaccessible"
+)

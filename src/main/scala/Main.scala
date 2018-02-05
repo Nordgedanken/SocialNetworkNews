@@ -16,6 +16,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
+/**
+  * @author MTRNord <freifunknews@nordgedanken.blog>
+  * @todo rework to make this more generic
+  * @version 0.1.0
+  *
+  */
 object Main extends App {
 
   val consumerToken =
@@ -59,7 +65,7 @@ object Main extends App {
         consumerToken = consumerToken
       )
 
-      val sender = new twitterSender.Sender(restClient = restClient)
+      //val sender = new twitterSender.Sender(restClient = restClient)
       //sender.sendHelloWorld
 
       val stream = new twitterCrawler.StreamingApi(
@@ -72,7 +78,9 @@ object Main extends App {
     case Failure(err) => println(err.toString)
   }
 
-  //Keep alive workaround
+  /**
+    * Keep alive workaround
+    */
   val waitFunc = Future {
     while (true) {
       Thread.sleep(1000)

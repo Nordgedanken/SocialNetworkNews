@@ -4,7 +4,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.danielasfregola.twitter4s.entities.streaming.common.DisconnectMessage
+import com.danielasfregola.twitter4s.entities.streaming.common.{DisconnectMessage, LimitNotice, WarningMessage}
 import com.danielasfregola.twitter4s.entities.{Tweet, User}
 import com.danielasfregola.twitter4s.http.clients.streaming.TwitterStream
 import com.danielasfregola.twitter4s.{TwitterRestClient, TwitterStreamingClient}
@@ -35,14 +35,19 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
     * @return
     */
   def fetchTweets: Future[TwitterStream] = {
-    val trackedWords: Seq[String] =
-      conf.getStringList("twitter.trackedWords").asScala
+    val trackedWordsConf =
+      conf.getStringList("twitter.trackedWords")
+    var trackedWords: Seq[String] = Seq()
     val trackedLists: List[String] =
       conf.getStringList("twitter.lists").asScala.toList
     val trackedUsers: Seq[Long] = Await.result(
       this.getListUsers(trackedLists),
       scala.concurrent.duration.Duration.Inf
     )
+
+    trackedWordsConf.forEach((s: String) =>{
+      trackedWords = trackedWords :+ s
+    })
 
     println(
       s"Launching streaming session with tracked keywords: $trackedWords\r\n" +
@@ -55,7 +60,13 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
         this.saveIDforLater(tweet)
         println("Done Saving")
       case disconnect: DisconnectMessage =>
-        println("Disconnect: ", disconnect.disconnect.reason)
+        println("Disconnect: ", disconnect.disconnect)
+      case limit: LimitNotice =>
+        println("Limit: ", limit)
+      case warning: WarningMessage =>
+        println("Warning: ", warning.warning)
+      case default =>
+        println(default)
     }
   }
 
@@ -68,10 +79,14 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
   private def saveIDforLater(tweet: Tweet): Unit = {
     val currentDate =
       new Date(DateTime.now(DateTimeZone.UTC).getMillis)
-    val today = new SimpleDateFormat("dd/MM/yyyy").format(currentDate)
+    val today = new SimpleDateFormat("dd_MM_yyyy").format(currentDate)
+    val dir = new File("data/")
+    if (!dir.exists()) {
+      dir.mkdir()
+    }
     val todaysTweets = new File(s"data/tweets.$today")
     if (!todaysTweets.exists()) {
-      todaysTweets
+      todaysTweets.createNewFile()
     }
     val writer = CSVWriter.open(todaysTweets, append = true)
     writer.writeRow(List(tweet.id_str, currentDate.toString))

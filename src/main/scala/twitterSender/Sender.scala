@@ -9,7 +9,7 @@ class Sender(val restClient: TwitterRestClient) {
   def sendHelloWorld: Tweet = {
     Await.result(
       restClient.createTweet(
-        status = "Hello world vom Scalar Freifunk News Projekt!"
+        status = "Test123"
       ),
       scala.concurrent.duration.Duration.Inf
     )
