@@ -30,3 +30,4 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1"
 )
 enablePlugins(JavaAppPackaging)
+scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")

@@ -35,7 +35,8 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
     streamingClient.filterStatuses(tracks = trackedWords, follow = trackedUsers) {
       case tweet: Tweet =>
         println(tweet.text)
-        this.saveToDatabase(tweet)
+        //this.saveToDatabase(tweet)
+        println("Done Saving")
       case disconnect: DisconnectMessage =>
         println("Disconnect: ", disconnect.disconnect.reason)
     }
