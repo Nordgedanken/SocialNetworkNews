@@ -1,15 +1,9 @@
 import com.danielasfregola.twitter4s.entities.enums.AccessType
 import com.danielasfregola.twitter4s.entities.enums.AccessType.AccessType
 import com.danielasfregola.twitter4s.entities.{AccessToken, ConsumerToken}
-import com.danielasfregola.twitter4s.util.Configurations.{
-  consumerTokenKey,
-  consumerTokenSecret
-}
-import com.danielasfregola.twitter4s.{
-  TwitterAuthenticationClient,
-  TwitterRestClient,
-  TwitterStreamingClient
-}
+import com.danielasfregola.twitter4s.util.Configurations.{consumerTokenKey, consumerTokenSecret}
+import com.danielasfregola.twitter4s.{TwitterAuthenticationClient, TwitterRestClient, TwitterStreamingClient}
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -22,7 +16,7 @@ import scala.util.{Failure, Success}
   * @version 0.1.0
   *
   */
-object Main extends App {
+object Main extends App with StrictLogging {
 
   val consumerToken =
     ConsumerToken(key = consumerTokenKey, secret = consumerTokenSecret)
@@ -77,7 +71,7 @@ object Main extends App {
       webServer.WebServer.main()
 
       generator.Scheduler.main()
-    case Failure(err) => println(err.toString)
+    case Failure(err) => logger.error(err.toString)
   }
 
   /**

@@ -10,6 +10,7 @@ import com.danielasfregola.twitter4s.http.clients.streaming.TwitterStream
 import com.danielasfregola.twitter4s.{TwitterRestClient, TwitterStreamingClient}
 import com.github.tototoshi.csv.CSVWriter
 import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.scalalogging.StrictLogging
 import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.collection.JavaConverters._
@@ -26,7 +27,7 @@ import scala.concurrent.{Await, Future}
   * @param restClient holds the current Client for the Twitter Rest API
   */
 class StreamingApi(val streamingClient: TwitterStreamingClient,
-                   val restClient: TwitterRestClient) {
+                   val restClient: TwitterRestClient) extends StrictLogging {
   val conf: Config = ConfigFactory.load()
 
   /**
@@ -49,24 +50,24 @@ class StreamingApi(val streamingClient: TwitterStreamingClient,
       trackedWords = trackedWords :+ s
     })
 
-    println(
+    logger.info(
       s"Launching streaming session with tracked keywords: $trackedWords\r\n" +
         s"And with tracked Users: $trackedUsers"
     )
 
     streamingClient.filterStatuses(tracks = trackedWords, follow = trackedUsers) {
       case tweet: Tweet =>
-        println(tweet.text)
+        logger.debug(tweet.text)
         this.saveIDforLater(tweet)
-        println("Done Saving")
+        logger.debug("Done Saving")
       case disconnect: DisconnectMessage =>
-        println("Disconnect: ", disconnect.disconnect)
+        logger.warn("Disconnect: ", disconnect.disconnect)
       case limit: LimitNotice =>
-        println("Limit: ", limit)
+        logger.warn("Limit: ", limit)
       case warning: WarningMessage =>
-        println("Warning: ", warning.warning)
+        logger.warn("Warning: ", warning.warning)
       case default =>
-        println(default)
+        logger.debug(default.toString)
     }
   }
 

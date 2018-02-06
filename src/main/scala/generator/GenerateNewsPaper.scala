@@ -1,10 +1,11 @@
 package generator
 
+import com.typesafe.scalalogging.StrictLogging
 import org.quartz.{Job, JobExecutionContext}
 
-class GenerateNewsPaper extends Job {
-  override def execute(context: JobExecutionContext): Unit = {
+class GenerateNewsPaper extends Job with StrictLogging {
+  def execute(context: JobExecutionContext): Unit = {
     //TODO parse CSV from yesterday and generate Feed
-    println("unimplemented")
+    logger.info("unimplemented")
   }
 }

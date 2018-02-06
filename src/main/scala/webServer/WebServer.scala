@@ -5,10 +5,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.concurrent.ExecutionContextExecutor
 
-object WebServer {
+object WebServer  extends StrictLogging {
   def main() {
 
     implicit val system: ActorSystem = ActorSystem("FreifunkNews")
@@ -39,7 +40,7 @@ object WebServer {
     val bindingFuture =
       Http().bindAndHandleSync(requestHandler, "localhost", 8080)
 
-    println(s"Server online at http://localhost:8080/")
+    logger.info(s"Server online at http://localhost:8080/")
     bindingFuture
       .flatMap(_.unbind()) // trigger unbinding from the port
       .onComplete(_ => system.terminate()) // and shutdown when done
