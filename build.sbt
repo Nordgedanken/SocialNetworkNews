@@ -22,9 +22,10 @@ mainClass in (Compile, packageBin) := Some("Main")
 mainClass in (Compile, run) := Some("Main")
 
 resolvers += Resolver.sonatypeRepo("snapshots")
+resolvers += Resolver.sonatypeRepo("stable")
 resolvers += DefaultMavenRepository
 libraryDependencies ++= Seq(
-  "com.danielasfregola" %% "twitter4s" % "5.5-SNAPSHOT",
+  "com.danielasfregola" %% "twitter4s" % "6.0-SNAPSHOT",
   "com.typesafe" % "config" % "1.3.2",
   "ch.qos.logback" % "logback-classic" % "1.1.9",
   "com.typesafe.slick" %% "slick" % "3.2.1",

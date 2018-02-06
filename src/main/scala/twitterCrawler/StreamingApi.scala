@@ -17,6 +17,19 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
+
+object RestAPISingleton {
+  private var restAPI: TwitterRestClient = _
+  def getRestAPI: TwitterRestClient = {
+    this.restAPI
+  }
+
+  def setRestAPI(restAPI: TwitterRestClient): Unit = {
+    this.restAPI = restAPI
+  }
+
+}
+
 /**
   *
   * StreamingAPI class is the connector for the Twitter Streaming Api
@@ -24,11 +37,10 @@ import scala.concurrent.{Await, Future}
   * It mainly has the purpose to get Tweets of the users from the Lists and Hashtags defined inside the Config
   *
   * @param streamingClient holds the current Client for the Twitter Streaming API
-  * @param restClient holds the current Client for the Twitter Rest API
   */
-class StreamingApi(val streamingClient: TwitterStreamingClient,
-                   val restClient: TwitterRestClient) extends StrictLogging {
+class StreamingApi(val streamingClient: TwitterStreamingClient) extends StrictLogging {
   val conf: Config = ConfigFactory.load()
+  val restClient: TwitterRestClient = RestAPISingleton.getRestAPI
 
   /**
     * fetchTweets is a async function, that listens on Twitter's Streaming API for the defined Lists and Hastags

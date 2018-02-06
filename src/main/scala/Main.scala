@@ -1,9 +1,11 @@
 import com.danielasfregola.twitter4s.entities.enums.AccessType
 import com.danielasfregola.twitter4s.entities.enums.AccessType.AccessType
 import com.danielasfregola.twitter4s.entities.{AccessToken, ConsumerToken}
-import com.danielasfregola.twitter4s.util.Configurations.{consumerTokenKey, consumerTokenSecret}
 import com.danielasfregola.twitter4s.{TwitterAuthenticationClient, TwitterRestClient, TwitterStreamingClient}
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.StrictLogging
+import generator.GenerateNewsPaper
+import twitterCrawler.RestAPISingleton
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,9 +19,9 @@ import scala.util.{Failure, Success}
   *
   */
 object Main extends App with StrictLogging {
-
+  val conf: Config = ConfigFactory.load
   val consumerToken =
-    ConsumerToken(key = consumerTokenKey, secret = consumerTokenSecret)
+    ConsumerToken(key = conf.getString("twitter.consumer.key"), secret = conf.getString("twitter.consumer.secret"))
   val TwitterAuthClient = new TwitterAuthenticationClient(consumerToken)
 
   val write_access: AccessType = AccessType.Write
@@ -42,8 +44,6 @@ object Main extends App with StrictLogging {
           10 seconds
         )
 
-      val consumerToken =
-        ConsumerToken(key = consumerTokenKey, secret = consumerTokenSecret)
       val accessToken = AccessToken(
         key = AccessTokenResp.accessToken.key,
         secret = AccessTokenResp.accessToken.secret
@@ -62,11 +62,15 @@ object Main extends App with StrictLogging {
       //val sender = new twitterSender.Sender(restClient = restClient)
       //sender.sendHelloWorld
 
+      RestAPISingleton.setRestAPI(restClient)
+
       val stream = new twitterCrawler.StreamingApi(
-        streamingClient = streamingClient,
-        restClient = restClient
+        streamingClient = streamingClient
       )
       stream.fetchTweets
+
+      val test = new GenerateNewsPaper
+      test.execute(null)
 
       webServer.WebServer.main()
 

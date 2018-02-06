@@ -7,6 +7,9 @@ import org.quartz.JobBuilder.newJob
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz.impl.StdSchedulerFactory
 
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 object Scheduler {
   val conf: Config = ConfigFactory.load()
@@ -26,6 +29,17 @@ object Scheduler {
 
       // Tell quartz to schedule the job using our trigger
       scheduler.scheduleJob(job, trigger)
+
+      /**
+        * Keep alive workaround
+        */
+      val waitFunc = Future {
+        while (true) {
+          Thread.sleep(1000)
+        }
+      }
+
+      Await.result(waitFunc, scala.concurrent.duration.Duration.Inf)
 
       scheduler.shutdown()
     } catch {
