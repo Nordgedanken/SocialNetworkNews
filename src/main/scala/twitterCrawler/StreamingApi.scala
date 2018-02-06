@@ -69,9 +69,12 @@ class StreamingApi(val streamingClient: TwitterStreamingClient) extends StrictLo
 
     streamingClient.filterStatuses(tracks = trackedWords, follow = trackedUsers) {
       case tweet: Tweet =>
+        println("=============")
+        logger.info("Found a new Tweet... Saving...")
         logger.debug(tweet.text)
         this.saveIDforLater(tweet)
         logger.debug("Done Saving")
+        println("=============")
       case disconnect: DisconnectMessage =>
         logger.warn("Disconnect: ", disconnect.disconnect)
       case limit: LimitNotice =>

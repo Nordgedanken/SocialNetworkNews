@@ -14,11 +14,12 @@ import scala.concurrent.Await
 class GenerateNewsPaper extends Job with StrictLogging {
   def execute(context: JobExecutionContext): Unit = {
     //TODO parse CSV from yesterday and generate Feed
+    println("=============")
     val reader = this.getReader
     val api = RestAPISingleton.getRestAPI
     reader.foreach(line => {
       val tweetID: Long = line.head.toLong
-      logger.info(tweetID.toString)
+      println("--------------")
       //Get Tweet from id
       val tweets = Await.result(api.getTweet(id = tweetID), scala.concurrent.duration.Duration.Inf)
       val tweet = tweets.data
@@ -36,7 +37,9 @@ class GenerateNewsPaper extends Job with StrictLogging {
       logger.info(s"RetweetCount: $retweet_count")
       logger.info(s"RetweetStatus: $retweeted")
       logger.info(s"FavoriteCount: $favorite_count")
+      println("--------------")
     })
+    println("=============")
   }
 
   private def getReader: CSVReader = {

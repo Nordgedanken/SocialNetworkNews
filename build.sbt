@@ -33,6 +33,7 @@ libraryDependencies ++= Seq(
   "com.github.tototoshi" %% "scala-csv" % "1.3.5",
   "org.quartz-scheduler" % "quartz" % "2.3.0",
   "org.quartz-scheduler" % "quartz-jobs" % "2.3.0",
+  "org.codehaus.janino" % "janino" % "3.0.7",
 )
 enablePlugins(JavaAppPackaging)
 scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")

@@ -4,12 +4,11 @@ import com.danielasfregola.twitter4s.entities.{AccessToken, ConsumerToken}
 import com.danielasfregola.twitter4s.{TwitterAuthenticationClient, TwitterRestClient, TwitterStreamingClient}
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.StrictLogging
-import generator.GenerateNewsPaper
 import twitterCrawler.RestAPISingleton
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 
 /**
@@ -69,8 +68,8 @@ object Main extends App with StrictLogging {
       )
       stream.fetchTweets
 
-      val test = new GenerateNewsPaper
-      test.execute(null)
+      /*val test = new GenerateNewsPaper
+      test.execute(null)*/
 
       webServer.WebServer.main()
 
