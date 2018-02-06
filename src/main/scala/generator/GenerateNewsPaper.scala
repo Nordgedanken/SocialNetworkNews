@@ -18,29 +18,24 @@ class GenerateNewsPaper extends Job with StrictLogging {
     val api = RestAPISingleton.getRestAPI
     reader.foreach(line => {
       val tweetID: Long = line.head.toLong
-      println(tweetID.toString)
+      logger.info(tweetID.toString)
       //Get Tweet from id
       val tweets = Await.result(api.getTweet(id = tweetID), scala.concurrent.duration.Duration.Inf)
       val tweet = tweets.data
       tweet.in_reply_to_status_id_str match {
-        case Some(value) => println("inReplyTo: ", value)
-        case None => println("inReplyTo: None")
-      }
-      tweet.extended_entities match {
-        case Some(value) => println("ExtendedEntities: ", value)
-        case None => println("ExtendedEntities: None")
+        case Some(value) => logger.info(s"inReplyTo: $value")
+        case None => logger.info("inReplyTo: None")
       }
       val df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-      println("Created at: ", df.format(tweet.created_at))
-      println("ID: ", tweet.id)
-      println("RetweetCount: ", tweet.retweet_count)
-      println("RetweetStatus: ", tweet.retweeted)
-      println("FavoriteCount: ", tweet.favorite_count)
-      println("Text:", tweet.text)
-      tweet.user match {
-        case Some(value) => println("User: ", value)
-        case None => println("User: None")
-      }
+      val created_at = df.format(tweet.created_at)
+      val retweet_count = tweet.retweet_count
+      val retweeted = tweet.retweeted
+      val favorite_count = tweet.favorite_count
+      logger.info(s"Created at: $created_at")
+      logger.info(s"ID: $tweetID")
+      logger.info(s"RetweetCount: $retweet_count")
+      logger.info(s"RetweetStatus: $retweeted")
+      logger.info(s"FavoriteCount: $favorite_count")
     })
   }
 
