@@ -71,8 +71,6 @@ object Main extends App with StrictLogging {
       /*val test = new GenerateNewsPaper
       test.execute(null)*/
 
-      webServer.WebServer.main()
-
       generator.Scheduler.main()
     case Failure(err) => logger.error(err.toString)
   }
